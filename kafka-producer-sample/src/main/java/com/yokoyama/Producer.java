@@ -18,14 +18,14 @@ public class Producer {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         config.put(ProducerConfig.ACKS_CONFIG, "all");
         KafkaProducer<String, String> producer = new KafkaProducer<>(config);
-
         String topic = "ads-log";
-        int campaignNum = 3;
+        int campaignNum = 10;
         for (int i = 0; i < campaignNum * 5; i++) {
             int campaignId = i % campaignNum;
             String ots = UUID.randomUUID().toString();
             String event = String.format("ots=%s, campaign_id=%s", ots, campaignId);
             producer.send(new ProducerRecord<>(topic, String.valueOf(campaignId), event));
+            System.out.println(event);
         }
         producer.close();
     }
