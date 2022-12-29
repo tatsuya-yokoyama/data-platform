@@ -16,6 +16,7 @@ public class Producer {
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:29092");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        config.put(ProducerConfig.ACKS_CONFIG, "all");
         KafkaProducer<String, String> producer = new KafkaProducer<>(config);
 
         String topic = "ads-log";
