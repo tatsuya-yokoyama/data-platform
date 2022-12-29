@@ -25,3 +25,4 @@ hs_err_pid*
 
 flink-1.16.0/
 */.idea/vcs.xml
+target/
