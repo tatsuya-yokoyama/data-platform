@@ -19,11 +19,17 @@ public class Producer {
         config.put(ProducerConfig.ACKS_CONFIG, "all");
         KafkaProducer<String, String> producer = new KafkaProducer<>(config);
         String topic = "ads-log";
-        int campaignNum = 10;
+        int campaignNum = 3;
         for (int i = 0; i < campaignNum * 5; i++) {
             int campaignId = i % campaignNum;
             String ots = UUID.randomUUID().toString();
-            String event = String.format("ots=%s, campaign_id=%s", ots, campaignId);
+            String logType;
+            if (Math.random() < 0.3) {
+                logType = "click";
+            } else {
+                logType = "vimp";
+            }
+            String event = String.format("logtype=%s,campaign_id=%s,timestamp=%s", logType, campaignId, System.currentTimeMillis() / 1000);
             producer.send(new ProducerRecord<>(topic, String.valueOf(campaignId), event));
             System.out.println(event);
         }

@@ -1,4 +1,9 @@
 CREATE DATABASE training;
+DROP TABLE training.action_vimp;
+DROP TABLE training.action_click;
+DROP TABLE training.report_vimp_mv;
+DROP TABLE training.report_click_mv;
+DROP TABLE training.report;
 
 CREATE TABLE IF NOT EXISTS training.action_vimp
 (
@@ -13,7 +18,6 @@ INSERT INTO training.action_vimp (`campaign_id`, `user_id`, `timestamp`) VALUES 
 
 CREATE TABLE IF NOT EXISTS training.action_click
 (
-    `ots` String,
     `campaign_id` Int64,
     `user_id` Int64,
     `timestamp` Int64
