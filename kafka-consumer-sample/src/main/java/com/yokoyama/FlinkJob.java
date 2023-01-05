@@ -1,34 +1,15 @@
 package com.yokoyama;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.util.JSONPObject;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import com.clickhouse.jdbc.*;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.json.JSONObject;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
-
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.HashMap;
+import java.sql.*;
 import java.util.Properties;
 
 public class FlinkJob {
@@ -38,33 +19,40 @@ public class FlinkJob {
                 .setBootstrapServers("127.0.0.1:29092")
                 .setTopics("ads-log")
                 .setGroupId("group1")
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        stream.map((MapFunction<String, String>) value -> {
-            String[] events = value.split(",");
-            String logType = events[0].split("=")[1];
-            String campaignId = events[1].split("=")[1];
-            String timestamp = events[2].split("=")[1];
-            String table;
-            if (logType.equals("vimp")) {
-                table = "training.action_vimp";
-            } else {
-                table = "training.action_click";
+        stream.addSink(new SinkFunction<>() {
+            @Override
+            public void invoke(String value, Context context) throws Exception {
+                String[] events = value.split(",");
+                String logType = events[0].split("=")[1];
+                String campaignId = events[1].split("=")[1];
+                String timestamp = events[2].split("=")[1];
+                String table;
+                if (logType.equals("vimp")) {
+                    table = "training.action_vimp";
+                } else {
+                    table = "training.action_click";
+                }
+                String query = String.format("INSERT INTO %s (campaign_id, user_id, timestamp) VALUES (%s,1,%s);", table, campaignId, timestamp);
+
+                String url = "jdbc:ch://localhost:18123";
+                Properties properties = new Properties();
+                ClickHouseDataSource dataSource = new ClickHouseDataSource(url, properties);
+                try {
+                    Connection connection = dataSource.getConnection("default", null);
+                    Statement statement = connection.createStatement();
+                    statement.executeQuery(query);
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                } finally {
+                    System.out.println(query);
+                }
+
             }
-            String query = String.format("INSERT INTO %s (campaign_id, user_id, timestamp) VALUES (%s,1,%s);", table, campaignId, timestamp);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:18123"))
-                    .header("Content-Type", "text/plain; charset=UTF-8")
-                    .POST(HttpRequest.BodyPublishers.ofString(query))
-                    .build();
-            HttpClient client = HttpClient.newHttpClient();
-            client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-                System.out.println(response.body());
-            });
-            return "Receiving from kafka:" + value;
-        }).print();
+        });
         env.execute();
     }
 }

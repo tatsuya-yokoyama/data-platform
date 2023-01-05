@@ -19,10 +19,9 @@ public class Producer {
         config.put(ProducerConfig.ACKS_CONFIG, "all");
         KafkaProducer<String, String> producer = new KafkaProducer<>(config);
         String topic = "ads-log";
-        int campaignNum = 3;
-        for (int i = 0; i < campaignNum * 5; i++) {
+        int campaignNum = 100;
+        for (int i = 0; i < campaignNum; i++) {
             int campaignId = i % campaignNum;
-            String ots = UUID.randomUUID().toString();
             String logType;
             if (Math.random() < 0.3) {
                 logType = "click";

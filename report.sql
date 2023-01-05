@@ -1,9 +1,5 @@
+DROP DATABASE training;
 CREATE DATABASE training;
-DROP TABLE training.action_vimp;
-DROP TABLE training.action_click;
-DROP TABLE training.report_vimp_mv;
-DROP TABLE training.report_click_mv;
-DROP TABLE training.report;
 
 CREATE TABLE IF NOT EXISTS training.action_vimp
 (
@@ -14,8 +10,6 @@ CREATE TABLE IF NOT EXISTS training.action_vimp
 ENGINE = MergeTree()
 ORDER BY timestamp;
 
-INSERT INTO training.action_vimp (`campaign_id`, `user_id`, `timestamp`) VALUES (1,1,toUnixTimestamp(now()));
-
 CREATE TABLE IF NOT EXISTS training.action_click
 (
     `campaign_id` Int64,
@@ -24,8 +18,6 @@ CREATE TABLE IF NOT EXISTS training.action_click
 )
 ENGINE = MergeTree()
 ORDER BY timestamp;
-
-INSERT INTO training.action_click (`campaign_id`, `user_id`, `timestamp`) VALUES (1,1,toUnixTimestamp(now()));
 
 
 CREATE TABLE IF NOT EXISTS training.report
