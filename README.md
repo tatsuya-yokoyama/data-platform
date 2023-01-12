@@ -25,8 +25,9 @@ mvn exec:java -Dexec.mainClass="com.yokoyama.Producer"
 ## Flink Job
 ```shell
 cd kafka-consumer-sample
+mvn celan compile
 mvn exec:java -Dexec.mainClass="com.yokoyama.FlinkJob"
 ```
 
-## Clickhouse
+## ClickHouse
 can use clickhouse provided by [smart-ad-campaign-metrics](https://github.com/smartnews/smart-ad-campaign-metrics)
