@@ -1,31 +1,32 @@
 # data-platform
 
 ## Kafka
-
-起動 with Docker
+Start with Docker
 ```shell
-cd ~/Documents/git/data-platform/docker
+cd data-platform/docker
 docker compose up -d
 ```
 
 Kafdrop
 http://localhost:9000/
 
-停止
+Stop
 ```shell
 docker compose down
 ```
 
-producer
+## Event producer
 ```shell
-cd ~/Documents/git/data-platform/kafka-producer-sample
+cd kafka-producer-sample
 mvn celan compile
 mvn exec:java -Dexec.mainClass="com.yokoyama.Producer"
 ```
 
-consumer
+## Flink Job
 ```shell
-cd ~/Documents/git/data-platform/kafka-consumer-sample
-mvn celan compile
-mvn exec:java -Dexec.mainClass="com.yokoyama.Consumer"
+cd kafka-consumer-sample
+mvn exec:java -Dexec.mainClass="com.yokoyama.FlinkJob"
 ```
+
+## Clickhouse
+can use clickhouse provided by [smart-ad-campaign-metrics](https://github.com/smartnews/smart-ad-campaign-metrics)
